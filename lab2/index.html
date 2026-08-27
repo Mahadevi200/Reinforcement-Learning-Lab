@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tic-Tac-Toe Reinforcement Learning</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:900px;margin:30px auto;padding:0 20px}
+h1{margin-bottom:5px}.sub{color:#555}
+.grid{display:grid;grid-template-columns:repeat(3,90px);gap:6px;margin:18px 0}
+button.cell{width:90px;height:90px;font-size:34px;font-weight:bold;cursor:pointer}
+button:disabled{cursor:not-allowed}
+.panel{padding:14px;border:1px solid #ccc;border-radius:8px;margin:12px 0}
+pre{background:#f6f6f6;padding:12px;overflow:auto}
+</style>
+</head>
+<body>
+<h1>Tic-Tac-Toe RL Demonstration</h1>
+<p class="sub">Value-function learning with epsilon-greedy exploration.</p>
+<div class="panel">
+<b>RL settings:</b> learning rate α = 0.5, exploration ε = 0.05.
+The Python implementation trains two agents through self-play.
+</div>
+<div id="status">You are X. Click a square; the browser opponent uses a simple value-guided policy.</div>
+<div class="grid" id="grid"></div>
+<button onclick="resetGame()">Reset game</button>
+<div class="panel"><b>Purpose:</b> demonstrate the Tic-Tac-Toe environment, legal actions, rewards, and agent interaction. The training experiment and quantitative results are produced by <code>tic_tac_toe_rl.py</code>.</div>
+<script>
+const lines=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let board=Array(9).fill("");
+const grid=document.getElementById("grid"), status=document.getElementById("status");
+function winner(b){for(const [a,c,d] of lines)if(b[a]&&b[a]===b[c]&&b[a]===b[d])return b[a];if(b.every(Boolean))return "D";return null}
+function resetGame(){board=Array(9).fill("");draw();status.textContent="You are X. Click a square; the browser opponent uses a simple value-guided policy."}
+function draw(){grid.innerHTML="";board.forEach((v,i)=>{let b=document.createElement("button");b.className="cell";b.textContent=v;b.disabled=!!v||winner(board)!==null;b.onclick=()=>human(i);grid.appendChild(b)})}
+function human(i){if(board[i]||winner(board))return;board[i]="X";draw();let w=winner(board);if(w){status.textContent=w==="D"?"Draw!":w+" wins!";return}setTimeout(ai,250)}
+function ai(){let moves=board.map((v,i)=>v?null:i).filter(x=>x!==null);let winMove=null;
+for(const m of moves){let b=board.slice();b[m]="O";if(winner(b)==="O"){winMove=m;break}}
+if(winMove===null)for(const m of moves){let b=board.slice();b[m]="X";if(winner(b)==="X"){winMove=m;break}}
+if(winMove===null && board[4]==="")winMove=4;
+if(winMove===null){let corners=[0,2,6,8].filter(m=>board[m]==="");if(corners.length)winMove=corners[Math.floor(Math.random()*corners.length)]}
+if(winMove===null)winMove=moves[Math.floor(Math.random()*moves.length)];
+board[winMove]="O";draw();let w=winner(board);status.textContent=w?(w==="D"?"Draw!":w+" wins!"): "Your turn."
+}
+resetGame();
+</script>
+</body>
+</html>
